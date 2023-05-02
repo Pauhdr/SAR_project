@@ -154,9 +154,27 @@ class SAR_Wiki_Crawler:
             return '\n'.join(l for l in txt.split('\n') if len(l) > 0)
 
         document = None
-
-        # COMPLETAR
-
+        document["url"]=url
+        tmp = [i for i in text.split("##") if i]
+        if tmp.count < 2: 
+            return None
+        document["title"]=tmp[0]
+        tmp = tmp[1].split("==")
+        document["summary"]=tmp[0]
+        document["sections"]=[]
+        for i in range(1,tmp.count -1, 2):
+            section = None
+            section["name"]=tmp[i]
+            aux = tmp[i+1].split("--")
+            section["text"]=aux[0]
+            section["subsections"] = []
+            for j in range(1, aux.count -1, 2):
+                subsection = None
+                subsection["name"]=aux[j]
+                subsection["text"]=aux[j+1]
+                section["subsections"].append(subsection)
+            document["sections"].append(section)
+        
         return document
 
 
@@ -237,6 +255,19 @@ class SAR_Wiki_Crawler:
             total_files = math.ceil(document_limit / batch_size)
 
         # COMPLETAR
+        while(total_documents_captured <= document_limit and queue.count > 0):
+            url = queue.pop()[2]
+            content = self.get_wikipedia_entry_content(url)
+            visited.add(url)
+            for lk in content[1]:
+                if self.is_valid_url(lk) and lk not in visited:
+                    queue.append((0, "", lk))
+            parsed = self.parse_wikipedia_textual_content(content, url)
+            documents.append(parsed)
+            hq.heapify(queue)
+            if total_files is not None and total_documents_captured == total_files:
+                self.save_documents(documents, base_filename)
+
 
 
     def wikipedia_crawling_from_url(self,
