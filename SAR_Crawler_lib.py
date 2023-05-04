@@ -256,18 +256,22 @@ class SAR_Wiki_Crawler:
 
         # COMPLETAR
         while(total_documents_captured <= document_limit and queue.count > 0):
-            url = queue.pop()[2]
-            content = self.get_wikipedia_entry_content(url)
+            url = queue.pop()
             visited.add(url)
-            for lk in content[1]:
-                if self.is_valid_url(lk) and lk not in visited:
-                    queue.append((0, "", lk))
-            parsed = self.parse_wikipedia_textual_content(content, url)
-            documents.append(parsed)
-            hq.heapify(queue)
-            if total_files is not None and total_documents_captured == total_files:
-                self.save_documents(documents, base_filename)
-
+            if url[0] <= max_depth_level:
+                content = self.get_wikipedia_entry_content(url[2])
+                parsed = self.parse_wikipedia_textual_content(content, url)
+                documents.append(parsed)
+                for lk in content[1]:
+                    if self.is_valid_url(lk) and lk not in visited:
+                        queue.append((url[0]+1, "", lk))
+                hq.heapify(queue)
+            if total_files is not None and len(documents) == batch_size:
+                self.save_documents(documents, base_filename, files_count+1, total_files)
+                files_count +=1
+                documents.clear()
+        if len(documents) > 0:
+            self.save_documents(documents, base_filename, files_count+1, total_files)
 
 
     def wikipedia_crawling_from_url(self,
