@@ -153,28 +153,28 @@ class SAR_Wiki_Crawler:
         def clean_text(txt):
             return '\n'.join(l for l in txt.split('\n') if len(l) > 0)
 
-        document = None
+        document = {}
+        text = clean_text(text)
         document["url"]=url
         tmp = [i for i in text.split("##") if i]
-        if tmp.count < 2: 
+        if len(tmp) < 2: 
             return None
         document["title"]=tmp[0]
         tmp = tmp[1].split("==")
         document["summary"]=tmp[0]
         document["sections"]=[]
-        for i in range(1,tmp.count -1, 2):
-            section = None
+        for i in range(1,len(tmp) -1, 2):
+            section = {}
             section["name"]=tmp[i]
             aux = tmp[i+1].split("--")
             section["text"]=aux[0]
             section["subsections"] = []
-            for j in range(1, aux.count -1, 2):
-                subsection = None
+            for j in range(1, len(aux) -1, 2):
+                subsection = {}
                 subsection["name"]=aux[j]
                 subsection["text"]=aux[j+1]
                 section["subsections"].append(subsection)
             document["sections"].append(section)
-        
         return document
 
 
@@ -255,17 +255,20 @@ class SAR_Wiki_Crawler:
             total_files = math.ceil(document_limit / batch_size)
 
         # COMPLETAR
-        while(total_documents_captured <= document_limit and queue.count > 0):
+        while(total_documents_captured <= document_limit and len(queue) > 0):
             url = queue.pop()
             visited.add(url)
             if url[0] <= max_depth_level:
                 content = self.get_wikipedia_entry_content(url[2])
-                parsed = self.parse_wikipedia_textual_content(content, url)
-                documents.append(parsed)
-                for lk in content[1]:
-                    if self.is_valid_url(lk) and lk not in visited:
-                        queue.append((url[0]+1, "", lk))
-                hq.heapify(queue)
+                if content != None:
+                    parsed = self.parse_wikipedia_textual_content(content[0], url[2])
+                    documents.append(parsed)
+                    for lk in content[1]:
+                        link = "https://es.wikipedia.org"+ lk
+                        if self.is_valid_url(link) and link not in visited:
+                            # print(link)
+                            queue.append((url[0]+1, "", link))
+                    hq.heapify(queue)
             if total_files is not None and len(documents) == batch_size:
                 self.save_documents(documents, base_filename, files_count+1, total_files)
                 files_count +=1
