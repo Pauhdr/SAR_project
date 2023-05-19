@@ -367,7 +367,7 @@ class SAR_Indexer:
             # Si el token no esta en el indice se añade con el docId correspondiente
             if (token not in index):
 
-                index[token] = [1, [self.docId]]
+                index[token] = [1, [self.artId]]
 
             # Si el token ya esta se actualiza la posting list del token
             else:
@@ -394,7 +394,7 @@ class SAR_Indexer:
 
         # El termino no puede estar en la posting list porque lo hemos uniqueado
         # Añadimos el nuevo termino
-        list_of_docs.append(self.docId)
+        list_of_docs.append(self.artId)
 
         # Actualizamos el numero de documentos en el que aparece cada token
         num_docs = len(list_of_docs)
@@ -625,7 +625,7 @@ class SAR_Indexer:
         """
 
         res = []
-
+        field = field if field != None else "all"
         term = term.lower()
         if ' ' in term: #Posting list con la ampliación de posicionales
             term = term.split()
@@ -639,9 +639,9 @@ class SAR_Indexer:
         
         else: #Posting list sin ampliación
             if term in self.index[field]:
-                res = list(self.index[field][term].keys())
+                res = list(self.index[field][term])
 
-        return res
+        return res[1]
 
 
     def get_positionals(self, terms: str, index):
@@ -859,6 +859,7 @@ class SAR_Indexer:
         errors = False
         for line in ql:
             if len(line) > 0 and line[0] != '#':
+                # print(line.split('\t'))
                 query, ref = line.split('\t')
                 reference = int(ref)
                 result = len(self.solve_query(query))
@@ -883,15 +884,32 @@ class SAR_Indexer:
 
         """
         result = self.solve_query(query)
-        print(query + "\t" + len(result))
+        print("========================================")
+        total = len(result) if self.show_all else self.SHOW_MAX
+        for id in range(total):
+            # print(result[id])
+            art = self.articles[result[id]]
+            doc = art[0]
+            pos = art[1]
+            file = self.docs[doc]
+            lines = open(file).readlines()
+            articulo = self.parse_article(lines[pos])
+            if self.show_snippet:
+                self.get_snippet(id+1, result[id], articulo)
+            else:
+                print(f"# {id+1} ( {result[id]}) {articulo['title']}:\t{articulo['url']}")
+
+        print("========================================")
+        print(f"Number of results: {len(result)}")
         return len(result)
         ################
         ## COMPLETAR  ##
         ################
 
 
-
-
+    def get_snippet(self, count, id, articulo: dict):
+        print(f"# {count} ( {id}) {articulo['title']}:\t{articulo['url']}")
+        print("Falta el extracto del articulo")
 
 
 
