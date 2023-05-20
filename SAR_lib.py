@@ -68,6 +68,7 @@ class SAR_Indexer:
     ###                         ###
     ###############################
 
+ 
     def increase_docId(self):
         """
 
@@ -205,8 +206,6 @@ class SAR_Indexer:
             print(f"ERROR:{root} is not a file nor directory!", file=sys.stderr)
             sys.exit(-1)
 
-        
-
     ##########################################
     ## COMPLETAR PARA FUNCIONALIDADES EXTRA ##
     ##########################################
@@ -276,46 +275,45 @@ class SAR_Indexer:
             article = self.parse_article(line)
             
             # Comprobamos si hemos procesado ya ese articulo. Si es asi pasamos a la siguiente iteracion
-            if (article["url"] in self.urls):
+            if (self.already_in_index(article)):
                 continue
 
             else:
-                self.save_article_by_ID(article,position_in_doc)
+                    
 
-            # Para la version minima solo nos importa la seccion "all"
-            if(self.multifield):
-                sections = [("all",article["all"]),("title",article["title"]),("summary",article["summary"]),("section-name",article["section-name"]),("url",article["url"])]
+                # Para la version minima solo nos importa la seccion "all"
+                if(self.multifield):
+                    sections = [("all",article["all"]),("title",article["title"]),("summary",article["summary"]),("section-name",article["section-name"]),("url",article["url"])]
             
-            else:
-                sections = [("all",article["all"])]
-
-            # Lo primero es tokenizar el articulo j
-            for section in sections:
-                # Tokenizamos la seccion de que se encuentra en la segunda posicion de la tupla
-                # La seccion url no se tokeniza de la misma forma que las demas. En esta seccion cada url es un token y por eso 
-                # utilizamos el metodo split()
-                if(section[0] == "url"):
-                    tokenize_article = section[1].split()
                 else:
-                    tokenize_article = self.tokenize(section[1])
+                    sections = [("all",article["all"])]
 
-                # Si no esta activado el posicionales tenemos que uniquear el texto
-                if(not self.positional):
-                    # Si no se piden positionals uniqueamos el texto       
+                # Lo primero es tokenizar el articulo j
+                for section in sections:
+                    # Tokenizamos la seccion de que se encuentra en la segunda posicion de la tupla
+                    # La seccion url no se tokeniza de la misma forma que las demas. En esta seccion cada url es un token y por eso 
+                    # utilizamos el metodo split()
+                    if(section[0] == "url"):
+                        tokenize_article = section[1].split()
+                    else:
+                        tokenize_article = self.tokenize(section[1])
+
+                    # Uniqueamos el articulo     
                     tokenize_article = set(tokenize_article)
                 
-                # Ahora vamos a actualizar el indice invertido con las nuevas palabras de este articulo
-                self.update_inverted_index(tokenize_article,self.index[section[0]])
+                    # Ahora vamos a actualizar el indice invertido con las nuevas palabras de este articulo
+                    self.update_inverted_index(tokenize_article,self.index[section[0]])
 
-                # Si se marca que se debe realizar el stemming creamos el indice
-                if (self.stemming):
-                    self.make_stemming(tokenize_article,section[0])
+                    # Si se marca que se debe realizar el stemming creamos el indice
+                    if (self.stemming):
+                        self.make_stemming(tokenize_article,section[0])
                 
-                # Si se marca que se debe realizar el permut
-                # 
-                # erm creamos el indice
-                if (self.permuterm):
-                    self.make_permuterm(tokenize_article,section[0])
+                    # Si se marca que se debe realizar el permuterm creamos el indice
+                    if (self.permuterm):
+                        self.make_permuterm(tokenize_article,section[0])
+
+                    # Finalmente guardamos el articulo una vez ya procesado y aumentamos el id de articulo
+                    self.save_article_by_ID(article,position_in_doc)
 
                 
 
@@ -335,19 +333,15 @@ class SAR_Indexer:
 
 
         """
+        # Añadimos la url para saber que ya se ha procesado
+        self.urls.add(article["url"])
 
-        # Si el articulo ya ha sido procesado entonces devolvemos false. Dando a entender que el metodo ha fallado
-        if (not self.already_in_index(article)):
+        # Guardamos en el diccionario los articulos con su id
+        # Para cada articulo guardamos el docId de su documento y la posicion dentro de el
+        self.articles[self.artId] = [self.docId, position_in_doc]
 
-            # Añadimos la url para saber que ya se ha procesado
-            self.urls.add(article["url"])
-
-            # Guardamos en el diccionario los articulos con su id
-            # Para cada articulo guardamos el docId de su documento y la posicion dentro de el
-            self.articles[self.artId] = [self.docId, position_in_doc]
-
-            # Aumentamos el indice del siguiente articulo que se procesara
-            self.increase_artId()
+        # Aumentamos el indice del siguiente articulo que se procesara
+        self.increase_artId()
 
             
 
@@ -363,7 +357,7 @@ class SAR_Indexer:
 
         # Recorremos todos los tokens del articulo
         for token in tokenize_article:
-
+            
             # Si el token no esta en el indice se añade con el docId correspondiente
             if (token not in index):
 
@@ -592,6 +586,7 @@ class SAR_Indexer:
                 post = self.get_posting(term)
                 while operator != []:
                     o = operator.pop()
+               
                     if o == "NOT":
                         post = self.reverse_posting(post)
                     elif o == "AND":
@@ -599,6 +594,8 @@ class SAR_Indexer:
                     elif o == "OR":
                         post = self.or_posting(posting, post)
                 posting = post
+
+                
 
         return posting
         ########################################
@@ -716,7 +713,7 @@ class SAR_Indexer:
         """
 
         res = list(self.articles.keys()) #Cogemos todas las noticias
-
+ 
         for d in p: #Si está la noticia en la posting list
             if d in res: #Y si aún no la hemos eliminado
                 res.remove(d) #Se elimina de la lista del total de noticias
@@ -742,7 +739,7 @@ class SAR_Indexer:
 
         res = [] #Creamos la posting list del resultado
         i, j = 0, 0
-
+        
         while i < len(p1) and j < len(p2): #El pseudocódigo de los apuntes pasado a código
             if p1[i] == p2[j]:
                 res.append(p1[i])
@@ -752,7 +749,7 @@ class SAR_Indexer:
                 i += 1
             else:
                 j += 1
-
+        
         return res
     
         ########################################
