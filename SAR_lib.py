@@ -438,12 +438,13 @@ class SAR_Indexer:
         """
         pass
 
-        stem_article = []
+        stem_article = set()
 
         # Lo primero convertimos los tokens en sus correspondientes stems
         for token in tokenize_article:
-            stem_article.append(self.stemmer.stem(token))
+            stem_article.add(self.stemmer.stem(token))
 
+        
         # Actualizamos el indice invertido del stem
         self.update_inverted_index(stem_article, self.sindex[section])
 
@@ -641,9 +642,6 @@ class SAR_Indexer:
         field = field if field != None else "all"
         
         term = term.lower()
-        if ' ' in term: #Posting list con la ampliación de posicionales
-            term = term.split()
-            res = self.get_positionals(term, field)
 
         if '*' in term or '?' in term: #Posting list con la ampliación de permuterms
             
@@ -701,8 +699,9 @@ class SAR_Indexer:
 
         if(field == None):
             field = "all"
-
-        return self.sindex[field][stem][1]
+        
+      
+        return self.sindex[field][stem]
 
     def get_permuterm(self, term: str, field: Optional[str] = None):
         """
