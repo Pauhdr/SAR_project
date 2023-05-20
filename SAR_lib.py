@@ -312,8 +312,8 @@ class SAR_Indexer:
                     if (self.permuterm):
                         self.make_permuterm(tokenize_article,section[0])
 
-                    # Finalmente guardamos el articulo una vez ya procesado y aumentamos el id de articulo
-                    self.save_article_by_ID(article,position_in_doc)
+                # Finalmente guardamos el articulo una vez ya procesado y aumentamos el id de articulo
+                self.save_article_by_ID(article,position_in_doc)
 
                 
 
@@ -583,12 +583,28 @@ class SAR_Indexer:
             if term in posibleOperations:
                 operator.append(term)
             else:
-                post = self.get_posting(term)
+                # Comprobamos que el termino no tiene una seccion asociada
+                term = term.split(":")
+                
+                # Si tiene una seccion asociada dividimos
+                if(len(term) == 2):
+                    section = term[0]
+                    term = term[1]
+
+                    post = self.get_posting(term,section)
+                   
+                # Si no tiene una seccion asociada
+                else:
+                    term = term[0]
+                    post = self.get_posting(term)
+
                 while operator != []:
                     o = operator.pop()
                
                     if o == "NOT":
+                       
                         post = self.reverse_posting(post)
+                        
                     elif o == "AND":
                         post = self.and_posting(posting, post)
                     elif o == "OR":
@@ -623,6 +639,7 @@ class SAR_Indexer:
 
         res = []
         field = field if field != None else "all"
+        
         term = term.lower()
         if ' ' in term: #Posting list con la ampliación de posicionales
             term = term.split()
@@ -637,7 +654,7 @@ class SAR_Indexer:
         else: #Posting list sin ampliación
             if term in self.index[field]:
                 res = list(self.index[field][term])
-
+       
         return res[1]
 
 
@@ -881,10 +898,24 @@ class SAR_Indexer:
 
         """
         result = self.solve_query(query)
+        
         print("========================================")
-        total = len(result) if self.show_all else self.SHOW_MAX
+       
+        # Si se se pide mostrar todos los resultados
+        if(self.show_all):
+            total = len(result)
+
+        # Si no, se muestran 10 resultados (SHOW_MAX) siempre y cuando haya 10 o mas resultados
+        else:
+
+            if(len(result) >= self.SHOW_MAX):
+                total = self.SHOW_MAX
+
+            else:
+                total = len(result)
+
         for id in range(total):
-            # print(result[id])
+            
             art = self.articles[result[id]]
             doc = art[0]
             pos = art[1]
