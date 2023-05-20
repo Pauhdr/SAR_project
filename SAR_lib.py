@@ -462,7 +462,7 @@ class SAR_Indexer:
         permuted_article = set()
         
         for token in tokenize_article:
-
+            
             token_permuterm = token+"$"
 
             for i in range(len(token_permuterm)):
@@ -470,7 +470,7 @@ class SAR_Indexer:
                 permuterm = token_permuterm[i:] + token_permuterm[:i]
 
                 permuted_article.add(permuterm)
-
+         
         # Actualizamos el indice invertido del permuterm
         self.update_inverted_index(permuted_article, self.ptindex[section])
 
@@ -646,6 +646,10 @@ class SAR_Indexer:
             res = self.get_positionals(term, field)
 
         if '*' in term or '?' in term: #Posting list con la ampliación de permuterms
+            
+            if(term.count("*") > 1 or term.count("?") > 1 or term.count("*") + term.count("?")  > 1):
+                print("ERROR: Las palabras solo pueden contener un simbolo")
+            
             res = self.get_permuterm(term, field)
 
         elif self.use_stemming: #Posting list con la ampliación de stemming
@@ -654,8 +658,13 @@ class SAR_Indexer:
         else: #Posting list sin ampliación
             if term in self.index[field]:
                 res = list(self.index[field][term])
-       
-        return res[1]
+        
+        # Si el resultado de la consulta es 0 devolvemos una lista vacia
+        if(res == []):
+            return []
+
+        else:
+            return res[1]
 
 
     def get_positionals(self, terms: str, index):
@@ -712,7 +721,90 @@ class SAR_Indexer:
         if(field == None):
             field = "all"
 
-        return self.ptindex[field][term][1]
+        # Primero añadimos el simbolo final $ al termino
+        term = term + "$"
+        
+        # Rotamos el simbolo para que quede al final
+        permuterm = self.rotate_term(term)
+
+        # Obtenemos el permuterm sin simbolo final
+        symbol = permuterm[len(permuterm)-1]
+        permuterm = permuterm[:-1]
+
+        # Obtenemos todas las entradas del indice que corresponden con la query
+        permuterm_set = self.get_permuted_terms(permuterm,symbol,field)
+
+        # Una vez que ya tenemos todos los terminos solo tenemos que hacer un and de todas sus posting list
+        posting_list = []
+
+        for key in permuterm_set:
+           
+            posting_list = self.or_posting(posting_list,self.ptindex[field][key][1])
+
+        # Convertimos la posting list al formato que hemos usado durante todo el proyecto
+        posting_list = [len(posting_list),posting_list]
+          
+        return posting_list
+
+    def rotate_term(self,term:str) -> str:
+        
+        """
+     
+        Devuelve el termino que se le pasa pero con el simbolo */? en la ultima posicion
+
+
+        param:  "term": termino que se quiere rotar
+
+
+        return: termino ya rotado adecuadamente
+
+        """
+        
+        # Debemos rotar el termino hasta poner el */? al final de la palabra
+        for i in range(len(term)):
+                
+            permuterm = term[i:] + term[:i]
+
+            if(permuterm[len(permuterm)-1] == "*" or permuterm[len(permuterm)-1] == "?"):
+                return permuterm
+
+
+    def get_permuted_terms(self,permuterm:str,symbol:str,field:str) -> set:
+        
+        """
+     
+        Devuelve todos las claves guardadas en el indice permuted que son validas para el termino que se pasa como parametro
+
+
+        param:  "permuterm": termino ya permutado
+
+
+        return: conjunto con todas las entradas validas del indice para el termino dado
+
+        """    
+
+        # El set donde iran los terminos permuted que coinciden con el termino
+        permuterm_set = set()
+
+        for key in self.ptindex[field].keys():
+                
+            if(symbol == "?"):
+
+                # Dado que la ? solo  se puede sustituir por un simbolo comprobamos que el tamaño es 1 caracter mayor
+                # Nos quedamos solo con las claves que empiezan por el permuterm
+                if(key.startswith(permuterm) and len(key) == len(permuterm)+1):
+                    permuterm_set.add(key)
+
+            if(symbol == "*"):
+            
+                # Dado que la * se puede sustituir por un numero ilimitado de simbolos comprobamos que el tamaño es mayor que el del permuted
+                # Nos quedamos solo con las claves que empiezan por el permuterm
+                if(key.startswith(permuterm) and len(key) > len(permuterm)):
+                    permuterm_set.add(key)
+
+
+        return permuterm_set
+
 
     def reverse_posting(self, p: list):
         """

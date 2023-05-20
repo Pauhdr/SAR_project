@@ -1,33 +1,13 @@
-búsqueda	58
-recuperación	33
-title:información	4
-summary:búsqueda	11
-summary:recuperación	17
-section-name:historia	94
-section-name:precisión	2
-NOT section-name:precisión	294
-title:información AND summary:búsqueda	2
-title:información AND summary:recuperación	3
-title:información AND búsqueda	2
-title:información AND recuperación	3
-title:información AND summary:recuperación AND section-name:precisión	2
-title:información AND summary:recuperación OR section-name:precisión	3
-title:información AND summary:recuperación AND NOT section-name:precisión	1
-almacenamiento	54
-programación	109
-Oric	5
-all:almacenamiento	54
-all:programación	109
-all:Oric	5
-title:almacenamiento	1
-title:programación	16
-title:Oric	2
-summary:almacenamiento	15
-summary:programación	74
-summary:Oric	3
-section-name:historia	94
-title:almacenamiento AND summary:almacenamiento	1
-title:almacenamiento OR summary:almacenamiento	15
-summary:Oric AND NOT title:Oric	1
-summary:almacenamiento AND section-name:historia	6
-
+casa	35
+cesa	3
+cisa	0
+cosa	26
+cusa	1
+casa OR cesa OR cisa OR cosa OR cusa	58
+c?sa	58
+c*sa	98
+c*sa AND c?sa	58
+c*sa OR c?sa	98
+c*sa AND NOT c?sa	40
+ma?a AND NOT mata	36
+bar*na OR val*cia OR pa*s	231
