@@ -612,10 +612,8 @@ class SAR_Indexer:
                         
                     elif o == "AND":
                         post = self.and_posting(posting, post)
-                        
                     elif o == "OR":
                         post = self.or_posting(posting, post)
-                        
                 posting = post
 
                 
@@ -959,7 +957,7 @@ class SAR_Indexer:
         results = []
         for query in ql:
             if len(query) > 0 and query[0] != '#':
-                r = self.solve_query(query)
+                r = self.solve_query(query)[1]
                 results.append(len(r))
                 if verbose:
                     print(f'{query}\t{len(r)}')
@@ -976,7 +974,7 @@ class SAR_Indexer:
                 # print(line.split('\t'))
                 query, ref = line.split('\t')
                 reference = int(ref)
-                result = len(self.solve_query(query))
+                result = len(self.solve_query(query)[1])
                 if reference == result:
                     print(f'{query}\t{result}')
                 else:
@@ -1036,7 +1034,7 @@ class SAR_Indexer:
         ################
 
 
-    def get_snippet(self, count, id, articulo: dict, terms:list):
+    def get_snippet(self, count, id, articulo: dict, terms: list):
         print(f"# {count} ( {id}) {articulo['title']}:\t{articulo['url']}")
         for term in terms:
             i = articulo['all'].find(' '+term)
