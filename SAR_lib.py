@@ -577,6 +577,7 @@ class SAR_Indexer:
         posibleOperations = ["NOT", "AND", "OR"]
         posting = []
         operator = []
+        terms = []
         if query is None or len(query) == 0:
             return []
 
@@ -599,6 +600,9 @@ class SAR_Indexer:
                     term = term[0]
                     post = self.get_posting(term)
 
+                if not "NOT" in operator:
+                    terms.append(term)
+
                 while operator != []:
                     o = operator.pop()
                
@@ -608,13 +612,15 @@ class SAR_Indexer:
                         
                     elif o == "AND":
                         post = self.and_posting(posting, post)
+                        
                     elif o == "OR":
                         post = self.or_posting(posting, post)
+                        
                 posting = post
 
                 
 
-        return posting
+        return (terms, posting)
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
@@ -992,7 +998,8 @@ class SAR_Indexer:
 
         """
         result = self.solve_query(query)
-        
+        terms = result[0]
+        result = result[1]
         print("========================================")
        
         # Si se se pide mostrar todos los resultados
@@ -1017,7 +1024,7 @@ class SAR_Indexer:
             lines = open(file).readlines()
             articulo = self.parse_article(lines[pos])
             if self.show_snippet:
-                self.get_snippet(id+1, result[id], articulo)
+                self.get_snippet(id+1, result[id], articulo, terms)
             else:
                 print(f"# {id+1} ( {result[id]}) {articulo['title']}:\t{articulo['url']}")
 
@@ -1029,9 +1036,19 @@ class SAR_Indexer:
         ################
 
 
-    def get_snippet(self, count, id, articulo: dict):
+    def get_snippet(self, count, id, articulo: dict, terms:list):
         print(f"# {count} ( {id}) {articulo['title']}:\t{articulo['url']}")
-        print("Falta el extracto del articulo")
+        for term in terms:
+            i = articulo['all'].find(' '+term)
+            start = i
+            end = i
+            if i > 25:
+                start = i-25
+            
+            if i+25 < len(articulo["all"]):
+                end = i+25
+            
+            print(f"...{articulo['all'][start:end]}...")
 
 
 
