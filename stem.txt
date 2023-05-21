@@ -1,0 +1,37 @@
+casa	789
+cosa	225
+NOT casa	585
+casa AND cosa	183
+casa AND NOT cosa	606
+precisión	99
+precisión AND exhaustividad	9
+precisión OR exhaustividad	117
+precisión AND NOT exhaustividad	90
+NOT precisión OR NOT exhaustividad	1365
+de	1373
+isla	242
+valencia	139
+sanidad	22
+cultura	210
+videojuegos	170
+videojuegos OR cultura	335
+videojuegos OR NOT videojuegos	1374
+isla AND valencia	73
+isla AND NOT valencia	169
+NOT pero	571
+isla AND NOT valencia AND NOT pero	71
+NOT isla AND NOT valencia AND NOT pero	429
+isla AND valencia AND pero	39
+isla OR valencia	308
+isla OR NOT valencia	1308
+NOT isla OR valencia	1205
+NOT isla OR NOT valencia	1301
+NOT isla OR NOT valencia AND pero	764
+NOT isla OR NOT valencia AND NOT pero	537
+NOT isla OR NOT valencia OR NOT pero	1335
+años	790
+google	301
+cultura	210
+google OR cultura	461
+años AND google	156
+años AND cultura	183

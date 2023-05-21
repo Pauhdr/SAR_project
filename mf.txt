@@ -1,0 +1,32 @@
+búsqueda	279
+recuperación	124
+title:información	15
+summary:búsqueda	71
+summary:recuperación	34
+section-name:historia	370
+section-name:precisión	4
+NOT section-name:precisión	1370
+title:información AND summary:búsqueda	3
+title:información AND summary:recuperación	4
+title:información AND búsqueda	7
+title:información AND recuperación	9
+title:información AND summary:recuperación AND section-name:precisión	2
+title:información AND summary:recuperación OR section-name:precisión	6
+title:información AND summary:recuperación AND NOT section-name:precisión	2
+almacenamiento	188
+programación	315
+Oric	5
+all:almacenamiento	188
+all:programación	315
+all:Oric	5
+title:almacenamiento	1
+title:programación	34
+title:Oric	2
+summary:almacenamiento	50
+summary:programación	171
+summary:Oric	3
+section-name:historia	370
+title:almacenamiento AND summary:almacenamiento	1
+title:almacenamiento OR summary:almacenamiento	50
+summary:Oric AND NOT title:Oric	1
+summary:almacenamiento AND section-name:historia	18

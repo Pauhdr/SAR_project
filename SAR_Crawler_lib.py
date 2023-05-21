@@ -266,7 +266,6 @@ class SAR_Wiki_Crawler:
                     for lk in content[1]:
                         link = "https://es.wikipedia.org"+ lk
                         if self.is_valid_url(link) and link not in visited:
-                            # print(link)
                             queue.append((url[0]+1, "", link))
                     hq.heapify(queue)
             if total_files is not None and len(documents) == batch_size:
