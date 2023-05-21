@@ -1037,7 +1037,7 @@ class SAR_Indexer:
     def get_snippet(self, count, id, articulo: dict, terms: list):
         print(f"# {count} ( {id}) {articulo['title']}:\t{articulo['url']}")
         for term in terms:
-            i = articulo['all'].find(' '+term)
+            i = re.search(f"\W{term}", articulo['all']).start()
             start = i
             end = i
             if i > 25:
