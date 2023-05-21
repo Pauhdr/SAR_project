@@ -739,8 +739,10 @@ class SAR_Indexer:
         for key in permuterm_set:
            
             posting_list = self.or_posting(posting_list,self.ptindex[field][key][1])
+            
 
         # Convertimos la posting list al formato que hemos usado durante todo el proyecto
+        
         posting_list = [len(posting_list),posting_list]
           
         return posting_list
@@ -786,6 +788,7 @@ class SAR_Indexer:
         permuterm_set = set()
 
         for key in self.ptindex[field].keys():
+         
                 
             if(symbol == "?"):
 
@@ -798,7 +801,7 @@ class SAR_Indexer:
             
                 # Dado que la * se puede sustituir por un numero ilimitado de simbolos comprobamos que el tamaño es mayor que el del permuted
                 # Nos quedamos solo con las claves que empiezan por el permuterm
-                if(key.startswith(permuterm) and len(key) > len(permuterm)):
+                if(key.startswith(permuterm) and len(key) >= len(permuterm)):
                     permuterm_set.add(key)
 
 

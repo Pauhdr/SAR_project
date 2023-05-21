@@ -3,6 +3,8 @@ import pickle
 import sys
 import time
 
+
+
 from SAR_lib import SAR_Indexer
 
 
@@ -29,6 +31,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+ 
+
     indexer = SAR_Indexer()
     t0 = time.time()
     indexer.index_dir(args.dir, **vars(args))
@@ -39,4 +43,5 @@ if __name__ == "__main__":
     print("Time indexing: %2.2fs." % (t1 - t0))
     print("Time saving: %2.2fs." % (t2 - t1))
     print()
+   
 
